@@ -1,0 +1,9 @@
+import express from "express";
+import { createReview, getReviewForHotel } from "../application/review.js";
+
+const reviewRouter = express.Router();
+
+reviewRouter.post("/", createReview);
+reviewRouter.get("/hotel/:hotelId", getReviewForHotel);
+
+export default reviewRouter;
