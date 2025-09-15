@@ -3,7 +3,7 @@ import Hotel from "../infrastructure/entities/Hotel.js";
 
 
 
-export const getAllLocations = async (req, res) => {
+export const getAllLocations = async (req, res,next) => {
     try {
         const locations = await Location.find();
         if (!locations || locations.length === 0) {
@@ -11,8 +11,8 @@ export const getAllLocations = async (req, res) => {
         }
         res.status(200).json(locations);
     } catch (error) {
-        console.error("Error fetching hotels:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        next(error);
+
     }
 };
 
@@ -28,7 +28,6 @@ export const createLocations = async (req, res) => {
         await newLocation.save();
         res.status(201).json(newLocation);
     } catch (error) {
-        console.error("Error creating hotel:", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };

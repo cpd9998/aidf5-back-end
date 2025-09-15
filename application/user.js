@@ -1,6 +1,6 @@
 import e from "express";
 import User from "../infrastructure/entities/User.js";
-export const createUser = async (req, res) => {
+export const createUser = async (req, res,next) => {
   try {
     const userData = req.body;
     if (
@@ -18,13 +18,11 @@ export const createUser = async (req, res) => {
     const user = await User.create(userData);
     res.status(201).json({ message: "User created successfully", user });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error creating user", error: error.message });
+      next(error);
   }
 };
 
-export const getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res,next) => {
   try {
     const users = await User.find();
     res.status(200).json(users);
@@ -35,7 +33,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const getUserById = async (req, res) => {
+export const getUserById = async (req, res,next) => {
   try {
     const userId = req.params.userId;
     const user = await User.findById(userId);
@@ -50,7 +48,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
-export const updateUser = async (req, res) => {
+export const updateUser = async (req, res,next) => {
   try {
     const userId = req.params.userId;
     const userData = req.body;
@@ -78,7 +76,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res,next) => {
   try {
     const userId = req.params.userId;
     const user = await User.findByIdAndDelete(userId);

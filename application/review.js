@@ -1,7 +1,7 @@
 import Review from "../infrastructure/entities/Review.js";
 import Hotel from "../infrastructure/entities/Hotel.js";
 
-export const createReview = async (req, res) => {
+export const createReview = async (req, res,next) => {
   try {
     const reviewData = req.body;
     if (!reviewData.rating || !reviewData.comment || !reviewData.hotelId) {
@@ -21,13 +21,11 @@ export const createReview = async (req, res) => {
 
     res.status(201).json({ message: "Review created successfully", review });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error creating review", error: error.message });
+      next(error);
   }
 };
 
-export const getReviewForHotel = async (req, res) => {
+export const getReviewForHotel = async (req, res,next) => {
   try {
     const hotelId = req.params.hotelId;
     const hotel = await Hotel.findById(hotelId).populate("review");
@@ -37,8 +35,6 @@ export const getReviewForHotel = async (req, res) => {
 
     res.status(200).json(hotel.review);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching reviews", error: error.message });
+      next(error);
   }
 };

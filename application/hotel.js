@@ -1,19 +1,20 @@
 import Hotel from "../infrastructure/entities/Hotel.js";
 
-export const getAllHotels = async (req, res) => {
+export const getAllHotels = async (req, res,next) => {
   try {
     const hotels = await Hotel.find();
     if (!hotels || hotels.length === 0) {
       return res.status(404).json({ message: "No hotels found" });
     }
+
     res.status(200).json(hotels);
+
   } catch (error) {
-    console.error("Error fetching hotels:", error);
-    return res.status(500).json({ message: "Internal server error" });
+      next(error);
   }
 };
 
-export const createHotel = async (req, res) => {
+export const createHotel = async (req, res,next) => {
   try {
     const hotelData = req.body;
     if (
@@ -28,12 +29,11 @@ export const createHotel = async (req, res) => {
     await newHotel.save();
     res.status(201).json(newHotel);
   } catch (error) {
-    console.error("Error creating hotel:", error);
-    res.status(500).json({ message: "Internal server error" });
+      next(error);
   }
 };
 
-export const getHotelById = async (req, res) => {
+export const getHotelById = async (req, res,next) => {
   try {
     const _id = req.params.id;
     const hotel = await Hotel.findById(_id);
@@ -42,12 +42,11 @@ export const getHotelById = async (req, res) => {
     }
     res.status(200).json(hotel);
   } catch (error) {
-    console.error("Error fetching hotel:", error);
-    return res.status(500).json({ message: "Internal server error" });
+      next(error);
   }
 };
 
-export const updateHotel = async (req, res) => {
+export const updateHotel = async (req, res,next) => {
   try {
     const _id = req.params.id;
     if (
@@ -64,12 +63,11 @@ export const updateHotel = async (req, res) => {
     }
     res.status(200).json(hotel);
   } catch (error) {
-    console.error("Error updating hotel:", error);
-    return res.status(500).json({ message: "Internal server error" });
+      next(error);
   }
 };
 
-export const patchHotel = async (req, res) => {
+export const patchHotel = async (req, res,next) => {
   try {
     const _id = req.params.id;
     const updateData = req.body;
@@ -80,12 +78,11 @@ export const patchHotel = async (req, res) => {
     await Hotel.findByIdAndUpdate(_id, { price: updateData.price });
     res.status(200).json({ message: "Hotel price updated successfully" });
   } catch (error) {
-    console.error("Error updating hotel:", error);
-    return res.status(500).json({ message: "Internal server error" });
+      next(error);
   }
 };
 
-export const deleteHotel = async (req, res) => {
+export const deleteHotel = async (req, res,next) => {
   try {
     const _id = req.params.id;
     const hotel = await Hotel.findByIdAndDelete(_id);
@@ -94,7 +91,6 @@ export const deleteHotel = async (req, res) => {
     }
     res.status(200).json({ message: "Hotel deleted successfully" });
   } catch (error) {
-    console.error("Error deleting hotel:", error);
-    return res.status(500).json({ message: "Internal server error" });
+      next(error);
   }
 };
