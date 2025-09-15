@@ -18,11 +18,14 @@ export const getAllHotels = async (req, res,next) => {
 export const createHotel = async (req, res,next) => {
   try {
     const hotelData = req.body;
+    console.log(hotelData);
     if (
       !hotelData.name ||
-      !hotelData.location ||
       !hotelData.price ||
-      !hotelData.description
+      !hotelData.desc ||
+       !hotelData.city ||
+        !hotelData.country ||
+        !hotelData.image
     ) {
      throw new ValidationError("Missing required fields")
     }
@@ -30,7 +33,8 @@ export const createHotel = async (req, res,next) => {
     await newHotel.save();
     res.status(201).json(newHotel);
   } catch (error) {
-      next(error);
+      console.log(error)
+     next(error);
   }
 };
 
