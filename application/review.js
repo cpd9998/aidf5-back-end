@@ -1,15 +1,15 @@
 import Review from "../infrastructure/entities/Review.js";
 import Hotel from "../infrastructure/entities/Hotel.js";
-
+import  {ValidationError,NotFoundError,UnauthorizedError} from '../api/domain/errors/index.js'
 export const createReview = async (req, res,next) => {
   try {
     const reviewData = req.body;
     if (!reviewData.rating || !reviewData.comment || !reviewData.hotelId) {
-      return res.status(400).json({ message: "All fields are required" });
+     throw new ValidationError("Missing required fields")
     }
     const hotel = await Hotel.findById(reviewData.hotelId);
     if (!hotel) {
-      return res.status(404).json({ message: "Hotel not found" });
+      throw new NotFoundError("Hotel not found")
     }
 
     const review = await Review.create({
@@ -30,7 +30,7 @@ export const getReviewForHotel = async (req, res,next) => {
     const hotelId = req.params.hotelId;
     const hotel = await Hotel.findById(hotelId).populate("review");
     if (!hotel) {
-      return res.status(404).json({ message: "Hotel not found" });
+        throw new NotFoundError("Hotel not found")
     }
 
     res.status(200).json(hotel.review);

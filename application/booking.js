@@ -1,5 +1,5 @@
 import Booking from "../infrastructure/entities/Booking.js";
-
+import  {ValidationError,NotFoundError,UnauthorizedError} from '../api/domain/errors/index.js'
 export const createBooking = async (req, res,next) => {
   try {
     const bookingData = req.body;
@@ -11,7 +11,7 @@ export const createBooking = async (req, res,next) => {
       !bookingData.roomNumber ||
       !bookingData.paymentStatus
     ) {
-      return res.status(400).json({ message: "Missing required fields" });
+        throw  new ValidationError("Missing required fields")
     }
 
     const newBookig = new Booking(bookingData);
@@ -29,7 +29,7 @@ export const getAllBookings = async (req, res,next) => {
       .populate("hotelId", "name");
     res.status(200).json(bookings);
   } catch (error) {
-    console.error("Error fetching bookings:", error);
+
       next(error);
   }
 };
@@ -39,7 +39,7 @@ export const getBookingById = async (req, res,next) => {
     const bookingId = req.params.bookingId;
     const booking = await Booking.findById(bookingId);
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+      throw  new NotFoundError("Booking not found")
     }
     res.status(200).json(booking);
   } catch (error) {
@@ -56,7 +56,7 @@ export const updateBooking = async (req, res,next) => {
       new: true,
     });
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+        throw  new NotFoundError("Booking not found")
     }
     res.status(200).json(booking);
   } catch (error) {
@@ -69,11 +69,10 @@ export const deleteBooking = async (req, res,next) => {
     const bookingId = req.params.bookingId;
     const booking = await Booking.findByIdAndDelete(bookingId);
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+        throw  new NotFoundError("Booking not found")
     }
     res.status(200).json({ message: "Booking deleted successfully" });
   } catch (error) {
-    console.error("Error deleting booking:", error);
       next(error);
   }
 };
