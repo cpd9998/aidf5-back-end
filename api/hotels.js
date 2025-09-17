@@ -7,6 +7,7 @@ import {
   patchHotel,
   deleteHotel,
 } from "../application/hotel.js";
+import isAuthenticated from "./middleware/authentication-middleware.js";
 
 const hotelRouter = express.Router();
 
