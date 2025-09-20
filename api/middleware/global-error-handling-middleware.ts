@@ -2,9 +2,16 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-} from "../domain/errors/index.js";
+} from "../domain/errors/index";
 
-const globalErrorHandlingMiddleware = (error, req, res, next) => {
+import { Request, Response, NextFunction } from "express";
+
+const globalErrorHandlingMiddleware = (
+  error: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (error instanceof NotFoundError) {
     res.status(error.statusCode).json({
       code: error.statusCode,

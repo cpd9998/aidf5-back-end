@@ -12,15 +12,14 @@ const reviewSchema = new mongoose.Schema({
     required: true,
   },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    type: String,
     required: true,
   },
-  // hotelId: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "Hotel",
-  //   required: true,
-  // },
+  hotelId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Hotel",
+    required: true,
+  },
 });
 
 const Review = mongoose.model("Review", reviewSchema);

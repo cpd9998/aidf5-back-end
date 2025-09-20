@@ -1,6 +1,6 @@
 import express from "express";
-import { getAllLocations, createLocations } from "../application/location.js";
-import isAuthenticated from "./middleware/authentication-middleware.js";
+import { getAllLocations, createLocations } from "../application/location";
+import isAuthenticated from "./middleware/authentication-middleware";
 
 const locationRouter = express.Router();
 

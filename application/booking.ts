@@ -1,6 +1,16 @@
-import Booking from "../infrastructure/entities/Booking.js";
-import  {ValidationError,NotFoundError,UnauthorizedError} from '../api/domain/errors/index.js'
-export const createBooking = async (req, res,next) => {
+import Booking from "../infrastructure/entities/Booking";
+import {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../api/domain/errors/index";
+import { Request, Response, NextFunction } from "express";
+
+export const createBooking = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const bookingData = req.body;
     if (
@@ -11,44 +21,55 @@ export const createBooking = async (req, res,next) => {
       !bookingData.roomNumber ||
       !bookingData.paymentStatus
     ) {
-        throw  new ValidationError("Missing required fields")
+      throw new ValidationError("Missing required fields");
     }
 
     const newBookig = new Booking(bookingData);
     await newBookig.save();
     res.status(201).json(newBookig);
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
 
-export const getAllBookings = async (req, res,next) => {
+export const getAllBookings = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const bookings = await Booking.find()
       .populate("userId", "fname")
       .populate("hotelId", "name");
     res.status(200).json(bookings);
   } catch (error) {
-
-      next(error);
+    next(error);
   }
 };
 
-export const getBookingById = async (req, res,next) => {
+export const getBookingById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const bookingId = req.params.bookingId;
     const booking = await Booking.findById(bookingId);
     if (!booking) {
-      throw  new NotFoundError("Booking not found")
+      throw new NotFoundError("Booking not found");
     }
     res.status(200).json(booking);
   } catch (error) {
     console.error("Error fetching booking:", error);
-      next(error);
+    next(error);
   }
 };
 
-export const updateBooking = async (req, res,next) => {
+export const updateBooking = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const bookingId = req.params.bookingId;
     const bookingData = req.body;
@@ -56,23 +77,27 @@ export const updateBooking = async (req, res,next) => {
       new: true,
     });
     if (!booking) {
-        throw  new NotFoundError("Booking not found")
+      throw new NotFoundError("Booking not found");
     }
     res.status(200).json(booking);
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
 
-export const deleteBooking = async (req, res,next) => {
+export const deleteBooking = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const bookingId = req.params.bookingId;
     const booking = await Booking.findByIdAndDelete(bookingId);
     if (!booking) {
-        throw  new NotFoundError("Booking not found")
+      throw new NotFoundError("Booking not found");
     }
     res.status(200).json({ message: "Booking deleted successfully" });
   } catch (error) {
-      next(error);
+    next(error);
   }
 };

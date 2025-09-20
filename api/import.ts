@@ -1,6 +1,5 @@
 import express from "express";
-import {importHotel} from "../application/import.js";
-
+import { importHotel } from "../application/import";
 
 const importRouter = express.Router();
 
