@@ -7,6 +7,7 @@ import {
 } from "../api/domain/errors/index";
 
 import { Request, Response, NextFunction } from "express";
+import { getAuth } from "@clerk/express";
 
 export const createReview = async (
   req: Request,
@@ -15,9 +16,11 @@ export const createReview = async (
 ) => {
   try {
     const reviewData = req.body;
+    const { userId } = getAuth(req);
     if (!reviewData.rating || !reviewData.comment || !reviewData.hotelId) {
       throw new ValidationError("Missing required fields");
     }
+    reviewData.userId = userId;
     const hotel = await Hotel.findById(reviewData.hotelId);
     if (!hotel) {
       throw new NotFoundError("Hotel not found");
@@ -26,6 +29,8 @@ export const createReview = async (
     const review = await Review.create({
       rating: reviewData.rating,
       comment: reviewData.comment,
+      hotelId: reviewData.hotelId,
+      userId: reviewData.userId,
     });
     hotel.review.push(review._id);
     await hotel.save();
