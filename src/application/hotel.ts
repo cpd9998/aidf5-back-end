@@ -56,6 +56,7 @@ export const getHotelById = async (
   next: NextFunction
 ) => {
   try {
+    console.log("Request Params ID:", req.params.id); // Debugging line
     const _id = req.params.id;
     const hotel = await Hotel.findById(_id);
     if (!hotel) {

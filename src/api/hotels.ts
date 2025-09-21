@@ -7,6 +7,7 @@ import {
   patchHotel,
   deleteHotel,
 } from "../application/hotel";
+import isAuthenticated from "./middleware/authentication-middleware";
 
 const hotelRouter = express.Router();
 
@@ -14,7 +15,7 @@ hotelRouter.route("/").get(getAllHotels).post(createHotel);
 
 hotelRouter
   .route("/:id")
-  .get(getHotelById)
+  .get(isAuthenticated, getHotelById)
   .put(updateHotel)
   .patch(patchHotel)
   .delete(deleteHotel);

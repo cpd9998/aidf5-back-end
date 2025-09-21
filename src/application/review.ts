@@ -48,12 +48,12 @@ export const getReviewForHotel = async (
 ) => {
   try {
     const hotelId = req.params.hotelId;
-    const hotel = await Hotel.findById(hotelId).populate("review");
-    if (!hotel) {
-      throw new NotFoundError("Hotel not found");
+    const review = await Review.findById(hotelId);
+    if (!review) {
+      throw new NotFoundError("No reviews found for this hotel");
     }
 
-    res.status(200).json(hotel.review);
+    res.status(200).json(review);
   } catch (error) {
     next(error);
   }
