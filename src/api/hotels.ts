@@ -8,10 +8,11 @@ import {
   deleteHotel,
 } from "../application/hotel";
 import isAuthenticated from "./middleware/authentication-middleware";
+import isAdmin from "./middleware/authorization-middleware";
 
 const hotelRouter = express.Router();
 
-hotelRouter.route("/").get(getAllHotels).post(createHotel);
+hotelRouter.route("/").get(getAllHotels).post(isAdmin, createHotel);
 
 hotelRouter
   .route("/:id")

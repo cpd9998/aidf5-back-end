@@ -1,9 +1,10 @@
+import { getAuth } from "@clerk/express";
 import UnauthorizedError from "../domain/errors/unauthorized-error";
 import { Request, Response, NextFunction } from "express";
 
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-  const authData = req.auth();
-  if (!authData.isAuthenticated) {
+  const auth = getAuth(req);
+  if (!auth?.isAuthenticated) {
     console.log("User is not authenticated");
     throw new UnauthorizedError("User is not authorized");
   }

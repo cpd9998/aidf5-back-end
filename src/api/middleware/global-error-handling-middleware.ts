@@ -22,6 +22,12 @@ const globalErrorHandlingMiddleware = (
       code: error.statusCode,
       message: error.message,
     });
+  } else if (error.name === "ForbiddenError") {
+    console.log("ForbiddenError", error.statusCode);
+    return res.status(error.statusCode).json({
+      code: error.statusCode,
+      message: error.message,
+    });
   } else {
     return res.status(500).json({
       code: 500,
