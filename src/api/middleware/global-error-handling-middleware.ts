@@ -1,9 +1,3 @@
-import {
-  NotFoundError,
-  UnauthorizedError,
-  ValidationError,
-} from "../domain/errors/index";
-
 import { Request, Response, NextFunction } from "express";
 
 const globalErrorHandlingMiddleware = (

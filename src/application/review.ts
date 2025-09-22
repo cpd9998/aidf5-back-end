@@ -1,10 +1,6 @@
 import Review from "../infrastructure/entities/Review";
 import Hotel from "../infrastructure/entities/Hotel";
-import {
-  ValidationError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../api/domain/errors/index";
+import { ValidationError, NotFoundError } from "../api/domain/errors/index";
 
 import { Request, Response, NextFunction } from "express";
 import { getAuth } from "@clerk/express";
