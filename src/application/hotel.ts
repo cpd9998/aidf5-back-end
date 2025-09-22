@@ -1,10 +1,8 @@
 import Hotel from "../infrastructure/entities/Hotel";
-import {
-  ValidationError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../api/domain/errors/index";
+import { ValidationError, NotFoundError } from "../api/domain/errors/index";
 import { Request, Response, NextFunction } from "express";
+
+import { CreateHotelDto } from "../api/domain/dtos/hotel";
 
 export const getAllHotels = async (
   req: Request,
@@ -30,18 +28,16 @@ export const createHotel = async (
 ) => {
   try {
     const hotelData = req.body;
-    console.log(hotelData);
-    if (
-      !hotelData.name ||
-      !hotelData.price ||
-      !hotelData.desc ||
-      !hotelData.city ||
-      !hotelData.country ||
-      !hotelData.image
-    ) {
-      throw new ValidationError("Missing required fields");
+    const result = CreateHotelDto.safeParse(hotelData);
+
+    if (!result.success) {
+      const errorList = JSON.parse(result.error.message).map((err: any) => {
+        return { [err.path[0]]: err.message };
+      });
+
+      throw new ValidationError(`${JSON.stringify(errorList)}`);
     }
-    const newHotel = new Hotel(hotelData);
+    const newHotel = new Hotel(result.data);
     await newHotel.save();
     res.status(201).json(newHotel);
   } catch (error) {
@@ -75,13 +71,15 @@ export const updateHotel = async (
 ) => {
   try {
     const _id = req.params.id;
-    if (
-      !req.body.name ||
-      !req.body.location ||
-      !req.body.price ||
-      !req.body.description
-    ) {
-      throw new ValidationError("Missing required fields");
+    const hotelData = req.body;
+    const result = CreateHotelDto.safeParse(hotelData);
+
+    if (!result.success) {
+      const errorList = JSON.parse(result.error.message).map((err: any) => {
+        return { [err.path[0]]: err.message };
+      });
+
+      throw new ValidationError(`${JSON.stringify(errorList)}`);
     }
     const hotel = await Hotel.findByIdAndUpdate(_id, req.body, { new: true });
     if (!hotel) {

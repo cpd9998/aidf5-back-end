@@ -4,6 +4,7 @@ import { ValidationError, NotFoundError } from "../api/domain/errors/index";
 
 import { Request, Response, NextFunction } from "express";
 import { getAuth } from "@clerk/express";
+import { CreateReviewDto } from "../api/domain/dtos/review";
 
 export const createReview = async (
   req: Request,
@@ -13,8 +14,15 @@ export const createReview = async (
   try {
     const reviewData = req.body;
     const { userId } = getAuth(req);
-    if (!reviewData.rating || !reviewData.comment || !reviewData.hotelId) {
-      throw new ValidationError("Missing required fields");
+
+    const result = CreateReviewDto.safeParse(reviewData);
+
+    if (!result.success) {
+      const errorList = JSON.parse(result.error.message).map((err: any) => {
+        return { [err.path[0]]: err.message };
+      });
+
+      throw new ValidationError(`${JSON.stringify(errorList)}`);
     }
     reviewData.userId = userId;
     const hotel = await Hotel.findById(reviewData.hotelId);

@@ -5,6 +5,7 @@ import {
   UnauthorizedError,
 } from "../api/domain/errors/index";
 import { Request, Response, NextFunction } from "express";
+import { CreateBookinglDto } from "../api/domain/dtos/booking";
 
 export const createBooking = async (
   req: Request,
@@ -13,15 +14,14 @@ export const createBooking = async (
 ) => {
   try {
     const bookingData = req.body;
-    if (
-      !bookingData.userId ||
-      !bookingData.hotelId ||
-      !bookingData.checkIn ||
-      !bookingData.checkOut ||
-      !bookingData.roomNumber ||
-      !bookingData.paymentStatus
-    ) {
-      throw new ValidationError("Missing required fields");
+    const result = CreateBookinglDto.safeParse(bookingData);
+
+    if (!result.success) {
+      const errorList = JSON.parse(result.error.message).map((err: any) => {
+        return { [err.path[0]]: err.message };
+      });
+
+      throw new ValidationError(`${JSON.stringify(errorList)}`);
     }
 
     const newBookig = new Booking(bookingData);
@@ -73,6 +73,17 @@ export const updateBooking = async (
   try {
     const bookingId = req.params.bookingId;
     const bookingData = req.body;
+
+    const result = CreateBookinglDto.safeParse(bookingData);
+
+    if (!result.success) {
+      const errorList = JSON.parse(result.error.message).map((err: any) => {
+        return { [err.path[0]]: err.message };
+      });
+
+      throw new ValidationError(`${JSON.stringify(errorList)}`);
+    }
+
     const booking = await Booking.findByIdAndUpdate(bookingId, bookingData, {
       new: true,
     });
