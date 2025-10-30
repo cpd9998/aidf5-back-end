@@ -9,7 +9,7 @@ const openAi = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const messages: { role: "user" | "assistant"; content: string }[] = [];
+//const messages: { role: "user" | "assistant"; content: string }[] = [];
 
 export const respondToAIQuery = async (
   req: Request,
@@ -20,10 +20,10 @@ export const respondToAIQuery = async (
     const { query } = req.body;
     const client = new OpenAI();
 
-    messages.push({
-      role: "user",
-      content: query,
-    });
+    // messages.push({
+    //   role: "user",
+    //   content: query,
+    // });
 
     const response = await client.responses.create({
       model: "gpt-5",
@@ -39,14 +39,14 @@ export const respondToAIQuery = async (
       .flat()
       .map((contentItem: any) => contentItem.text);
 
-    messages.push({
-      role: "assistant",
-      content: extractedText[0],
+    // messages.push({
+    //   role: "assistant",
+    //   content: extractedText[0],
+    // });
+
+    res.status(200).json({
+      message: [...query, { role: "assistant", content: extractedText[0] }],
     });
-
-    console.log("AI Response:", messages); // Debugging line
-
-    res.status(200).json({ output: extractedText[0] });
   } catch (error) {
     next(error);
   }
