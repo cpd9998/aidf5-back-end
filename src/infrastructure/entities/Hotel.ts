@@ -27,14 +27,18 @@ const hotelSchema = new mongoose.Schema({
     ref: "Review",
     default: [],
   },
-  image:{
-    type:String,
-    required:true
+  image: {
+    type: String,
+    required: true,
   },
-  country:{
-    type:String,
-    required:true
-  }
+  country: {
+    type: String,
+    required: true,
+  },
+  embedding: {
+    type: [Number],
+    default: [],
+  },
 });
 
 const Hotel = mongoose.model("Hotel", hotelSchema);

@@ -9,6 +9,7 @@ import locationRouter from "./src/api/location";
 import cors from "cors";
 import globalErrorHandlingMiddleware from "./src/api/middleware/global-error-handling-middleware";
 import { clerkMiddleware } from "@clerk/express";
+import searchRouter from "./src/api/search";
 
 dotenv.config();
 
@@ -18,9 +19,11 @@ const app = express();
 app.use(express.json()); /// middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // middleware
+    origin: "http://localhost:5174", // middleware
   })
 );
+
+app.use("/api/ai", searchRouter);
 
 app.use(clerkMiddleware()); // reads thw JWT token from the request and sets the auth object on the request
 app.use("/api/hotels", hotelRouter);

@@ -29,6 +29,7 @@ const globalErrorHandlingMiddleware = (
       message: error.message,
     });
   } else {
+    console.log("Internal Server Error", error);
     return res.status(500).json({
       code: 500,
       message: "Internal Server Error",

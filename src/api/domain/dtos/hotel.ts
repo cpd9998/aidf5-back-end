@@ -9,4 +9,8 @@ const CreateHotelDto = z.object({
   image: z.string().url("Image must be a valid URL"),
 });
 
-export { CreateHotelDto };
+const SearchHotelsDto = z.object({
+  query: z.string().min(1, "Query is required"),
+});
+
+export { CreateHotelDto, SearchHotelsDto };
