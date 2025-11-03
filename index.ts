@@ -19,13 +19,13 @@ const app = express();
 app.use(express.json()); /// middleware
 app.use(
   cors({
-    origin: "http://localhost:5174", // middleware
+    origin: "http://localhost:5173", // middleware
   })
 );
 
 app.use("/api/ai", searchRouter);
 
-app.use(clerkMiddleware()); // reads thw JWT token from the request and sets the auth object on the request
+//app.use(clerkMiddleware()); // reads thw JWT token from the request and sets the auth object on the request
 app.use("/api/hotels", hotelRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/users", userRouter);
