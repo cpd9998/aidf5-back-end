@@ -25,7 +25,7 @@ app.use(
 
 app.use("/api/ai", searchRouter);
 
-//app.use(clerkMiddleware()); // reads thw JWT token from the request and sets the auth object on the request
+app.use(clerkMiddleware()); // reads thw JWT token from the request and sets the auth object on the request
 app.use("/api/hotels", hotelRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/users", userRouter);

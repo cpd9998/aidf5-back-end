@@ -27,12 +27,18 @@ import {
   patchRoomStatus,
   updateRoom,
 } from "../application/room";
+import multer from "multer";
+
+// Multer setup (in-memory storage)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 const hotelRouter = express.Router();
 
 hotelRouter.route("/seed").get(seedHotelsWithEmbedding);
 
-hotelRouter.route("/").get(getAllHotels).post(createHotel);
+hotelRouter.route("/").get(getAllHotels);
+hotelRouter.route("/").post(upload.single("image"), createHotel);
 
 hotelRouter
   .route("/room-category")

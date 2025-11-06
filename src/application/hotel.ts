@@ -1,9 +1,13 @@
 import Hotel from "../infrastructure/entities/Hotel";
 import { ValidationError, NotFoundError } from "../api/domain/errors/index";
 import { Request, Response, NextFunction } from "express";
-
-import { CreateHotelDto, SearchHotelsDto } from "../api/domain/dtos/hotel";
+import { CreateHotelDto } from "../api/domain/dtos/hotel";
 import { embed } from "../util/embedding";
+import dotenv from "dotenv";
+import { v4 as uuidv4 } from "uuid";
+import s3 from "../util/s3Config";
+
+dotenv.config();
 
 export const getAllHotels = async (
   req: Request,
@@ -11,7 +15,9 @@ export const getAllHotels = async (
   next: NextFunction
 ) => {
   try {
-    const hotels = await Hotel.find();
+    const hotels = await Hotel.find().select(
+      "name city price desc rating review image country "
+    );
     if (!hotels || hotels.length === 0) {
       throw new NotFoundError("No hotel found");
     }
@@ -30,7 +36,31 @@ export const createHotel = async (
 ) => {
   try {
     const hotelData = req.body;
+    const file = req.file;
+
+    const targetFolder = process.env.HOTEL_FOLDER;
+    const mimeType = file?.mimetype;
+    const fileName = file?.originalname;
+    const fileKey = `${targetFolder}/${uuidv4()}-${fileName}`;
+
+    if (!file) {
+      return res.status(400).json({ message: "No image file provided." });
+    }
+
+    const params: any = {
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: fileKey,
+      Body: file?.buffer,
+      ContentType: mimeType,
+    };
+
+    const { Location } = await s3.upload(params).promise();
+
+    hotelData.image = Location;
+    hotelData.price = Number(hotelData.price);
     const result = CreateHotelDto.safeParse(hotelData);
+
+    console.log(result.data);
 
     if (!result.success) {
       const errorList = JSON.parse(result.error.message).map((err: any) => {
@@ -42,8 +72,6 @@ export const createHotel = async (
     const embedding = await embed(
       `${result.data.name} ${result.data.city} ${result.data.country} ${result.data.desc} ${result.data.price}`
     );
-
-    console.log(result.data.name, embedding);
 
     const newHotel = new Hotel({ ...result.data, embedding });
     await newHotel.save();
