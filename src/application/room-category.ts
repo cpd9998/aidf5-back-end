@@ -2,15 +2,31 @@ import { Request, Response, NextFunction } from "express";
 import { CreateRoomCategoryDto } from "../api/domain/dtos/room-category";
 import { NotFoundError, ValidationError } from "../api/domain/errors";
 import { RoomCategory } from "../infrastructure/entities/RoomCategory";
-
+import { uploadMultipleImagesToS3 } from "../util/uploadMultipleImage";
 export const createRoomCategory = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const hotelData = req.body;
-    const result = CreateRoomCategoryDto.safeParse(hotelData);
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    console.log("files", files);
+    console.log("body", req.body);
+
+    let imageUrls: string[] = [];
+    if (files) {
+      imageUrls = await uploadMultipleImagesToS3(files);
+    }
+
+    const roomCategoryData = {
+      ...req.body,
+      basePrice: Number(req.body.basePrice),
+      maxAdults: Number(req.body.maxAdults),
+      images: imageUrls,
+    };
+
+    const result = CreateRoomCategoryDto.safeParse(roomCategoryData);
 
     if (!result.success) {
       const errorList = JSON.parse(result.error.message).map((err: any) => {

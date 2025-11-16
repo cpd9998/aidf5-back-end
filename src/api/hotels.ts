@@ -28,6 +28,7 @@ import {
   updateRoom,
 } from "../application/room";
 import multer from "multer";
+import { getHotelBySearch } from "../application/hotel";
 
 // Multer setup (in-memory storage)
 const storage = multer.memoryStorage();
@@ -40,9 +41,11 @@ hotelRouter.route("/seed").get(seedHotelsWithEmbedding);
 hotelRouter.route("/").get(getAllHotels);
 hotelRouter.route("/").post(upload.single("image"), createHotel);
 
+hotelRouter.route("/search").get(getHotelBySearch);
+
 hotelRouter
   .route("/room-category")
-  .post(createRoomCategory)
+  .post(upload.array("images"), createRoomCategory)
   .get(getAllRoomCategories);
 
 hotelRouter
@@ -64,7 +67,7 @@ hotelRouter
 hotelRouter
   .route("/:id")
   .get(isAuthenticated, getHotelById)
-  .put(updateHotel)
+  .put(upload.single("image"), updateHotel)
   .patch(patchHotel)
   .delete(deleteHotel);
 

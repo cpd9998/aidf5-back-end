@@ -3,14 +3,13 @@ import mongoose from "mongoose";
 const RoomCategorySchema = new mongoose.Schema(
   {
     hotelId: {
-      type: [mongoose.Schema.Types.ObjectId],
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Hotel",
     },
 
     name: {
       type: String,
       required: true,
-      unique: true,
     },
 
     description: {
@@ -51,5 +50,7 @@ const RoomCategorySchema = new mongoose.Schema(
     timestamps: true, // Adds createdAt and updatedAt fields
   }
 );
+
+RoomCategorySchema.index({ hotelId: 1, name: 1 }, { unique: true });
 
 export const RoomCategory = mongoose.model("RoomCategory", RoomCategorySchema);

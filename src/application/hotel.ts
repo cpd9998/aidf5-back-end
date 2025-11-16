@@ -6,6 +6,7 @@ import { embed } from "../util/embedding";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 import s3 from "../util/s3Config";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 dotenv.config();
 
@@ -16,13 +17,45 @@ export const getAllHotels = async (
 ) => {
   try {
     const hotels = await Hotel.find().select(
-      "name city price desc rating review image country "
+      "_id name city price desc rating review image country "
     );
+
     if (!hotels || hotels.length === 0) {
       throw new NotFoundError("No hotel found");
     }
 
     res.status(200).json(hotels);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const getHotelBySearch = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { name } = req.query;
+    let query = {
+      ...(name && {
+        name: { $regex: name, $options: "i" },
+      }),
+    };
+
+    const hotels = await Hotel.find(query).select("name _id").limit(3);
+
+    const newHotels = hotels.map((hotel) => {
+      return {
+        value: hotel.name,
+        label: hotel.name,
+        id: hotel._id,
+      };
+    });
+
+    // 4. Send the results
+    res.status(200).json(newHotels);
   } catch (error) {
     console.log(error);
     next(error);
@@ -42,6 +75,7 @@ export const createHotel = async (
     const mimeType = file?.mimetype;
     const fileName = file?.originalname;
     const fileKey = `${targetFolder}/${uuidv4()}-${fileName}`;
+    const bucketName = process.env.AWS_S3_BUCKET_NAME;
 
     if (!file) {
       return res.status(400).json({ message: "No image file provided." });
@@ -54,9 +88,11 @@ export const createHotel = async (
       ContentType: mimeType,
     };
 
-    const { Location } = await s3.upload(params).promise();
+    const command = new PutObjectCommand(params);
 
-    hotelData.image = Location;
+    await s3.send(command);
+
+    hotelData.image = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
     hotelData.price = Number(hotelData.price);
     const result = CreateHotelDto.safeParse(hotelData);
 
@@ -109,7 +145,39 @@ export const updateHotel = async (
 ) => {
   try {
     const _id = req.params.id;
-    const hotelData = req.body;
+    let hotelData = req.body;
+    hotelData = { ...hotelData, price: Number(hotelData.price) };
+    const file = req.file;
+
+    console.log("file", file);
+
+    const targetFolder = process.env.HOTEL_FOLDER;
+    const mimeType = file?.mimetype;
+    const fileName = file?.originalname;
+    const fileKey = `${targetFolder}/${uuidv4()}-${fileName}`;
+    const bucketName = process.env.AWS_S3_BUCKET_NAME;
+
+    if (!file && !hotelData.image) {
+      return res.status(400).json({ message: "No image file provided." });
+    } else {
+      if (file) {
+        const params: any = {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: fileKey,
+          Body: file?.buffer,
+          ContentType: mimeType,
+        };
+
+        const command = new PutObjectCommand(params);
+
+        await s3.send(command);
+        hotelData = {
+          ...hotelData,
+          image: `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`,
+        };
+      }
+    }
+
     const result = CreateHotelDto.safeParse(hotelData);
 
     if (!result.success) {
@@ -119,7 +187,7 @@ export const updateHotel = async (
 
       throw new ValidationError(`${JSON.stringify(errorList)}`);
     }
-    const hotel = await Hotel.findByIdAndUpdate(_id, req.body, { new: true });
+    const hotel = await Hotel.findByIdAndUpdate(_id, hotelData, { new: true });
     if (!hotel) {
       throw new NotFoundError("Hotel not found");
     }

@@ -10,6 +10,7 @@ import cors from "cors";
 import globalErrorHandlingMiddleware from "./src/api/middleware/global-error-handling-middleware";
 import { clerkMiddleware } from "@clerk/express";
 import searchRouter from "./src/api/search";
+import paginationRouter from "./src/api/pagination";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use("/api/reviews", reviewRouter);
 app.use("/api/users", userRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/location", locationRouter);
+app.use("/api/pagination", paginationRouter);
 
 app.use(globalErrorHandlingMiddleware);
 
