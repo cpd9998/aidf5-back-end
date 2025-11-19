@@ -51,7 +51,10 @@ export const getAllRoomCategories = async (
   next: NextFunction
 ) => {
   try {
-    const hoteCategories = await RoomCategory.find();
+    const query = req.query.hotelId ? { hotelId: req.query.hotelId } : {};
+
+    const hoteCategories = await RoomCategory.find(query);
+
     if (!hoteCategories || hoteCategories.length === 0) {
       throw new NotFoundError("No hotel categories found");
     }
