@@ -3,6 +3,7 @@ import { CreateRoomCategoryDto } from "../api/domain/dtos/room-category";
 import { NotFoundError, ValidationError } from "../api/domain/errors";
 import { RoomCategory } from "../infrastructure/entities/RoomCategory";
 import { uploadMultipleImagesToS3 } from "../util/uploadMultipleImage";
+import { string } from "zod";
 export const createRoomCategory = async (
   req: Request,
   res: Response,
@@ -73,10 +74,15 @@ export const getRoomCategorylById = async (
 ) => {
   try {
     const _id = req.params.id;
-    const hotel = await RoomCategory.findById(_id);
+    const hotel = await RoomCategory.findById(_id).populate({
+      path: "hotelId",
+      select: "name",
+    });
     if (!hotel) {
       throw new NotFoundError("Room Category not found");
     }
+
+    console.log("hotel", hotel);
     res.status(200).json(hotel);
   } catch (error) {
     console.log(error);
@@ -92,6 +98,61 @@ export const updateRoomCategory = async (
   try {
     const _id = req.params.id;
     const hotelData = req.body;
+    const newFiles: any = req.files || [];
+
+    if (hotelData.amenities && typeof hotelData.amenities === "string") {
+      hotelData.amenities = [hotelData.amenities];
+    }
+
+    hotelData.basePrice = Number(hotelData.basePrice);
+    hotelData.maxAdults = Number(hotelData.maxAdults);
+
+    // Find existing room category
+    const existingCategory = await RoomCategory.findById(_id);
+    if (!existingCategory) {
+      throw new NotFoundError("Room Category not found");
+    }
+
+    // Handle images
+    let updatedImages: string[] = [];
+    let existingImages: string[] = [];
+
+    if (hotelData.images) {
+      if (typeof hotelData.images === "string") {
+        // Try to parse as JSON first
+        try {
+          const parsed = JSON.parse(hotelData.images);
+          existingImages = Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          // If parsing fails, treat it as a single URL or comma-separated URLs
+          existingImages = hotelData.images.includes(",")
+            ? hotelData.images.split(",").map((img: string) => img.trim())
+            : [hotelData.images];
+        }
+      } else if (Array.isArray(hotelData.images)) {
+        existingImages = hotelData.images;
+      } else {
+        // Single object/value
+        existingImages = [hotelData.images];
+      }
+    }
+
+    updatedImages = [...existingImages];
+
+    let imageUrls: string[] = [];
+    if (newFiles && newFiles.length > 0) {
+      imageUrls = await uploadMultipleImagesToS3(newFiles);
+      updatedImages = [...updatedImages, ...imageUrls];
+    }
+
+    // Delete removed images from storage
+
+    const imagesToDelete = existingCategory.images.filter(
+      (img: string) => !existingImages.includes(img)
+    );
+
+    hotelData.images = updatedImages;
+
     const result = CreateRoomCategoryDto.safeParse(hotelData);
 
     if (!result.success) {
@@ -101,13 +162,25 @@ export const updateRoomCategory = async (
 
       throw new ValidationError(`${JSON.stringify(errorList)}`);
     }
-    const roomCategory = await RoomCategory.findByIdAndUpdate(_id, req.body, {
+
+    // Update the room category with new data and images
+    const updateData = {
+      ...hotelData,
+      images: updatedImages,
+    };
+
+    console.log("updateDataaaaaaa", updateData);
+
+    delete updateData.existingImages;
+
+    const roomCategory = await RoomCategory.findByIdAndUpdate(_id, updateData, {
       new: true,
     });
-    if (!roomCategory) {
-      throw new NotFoundError("Room Category found");
-    }
-    res.status(200).json(roomCategory);
+
+    res.status(200).json({
+      success: true,
+      data: roomCategory,
+    });
   } catch (error) {
     next(error);
   }

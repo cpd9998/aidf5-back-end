@@ -51,7 +51,7 @@ hotelRouter
 hotelRouter
   .route("/room-category/:id")
   .get(getRoomCategorylById)
-  .put(updateRoomCategory)
+  .put(upload.array("images", 5), updateRoomCategory)
   .patch(patchRoomCategory)
   .delete(deleteRoomCategory);
 
