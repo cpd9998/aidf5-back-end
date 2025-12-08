@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { RoomCategory } from "../infrastructure/entities/RoomCategory";
+import { Room } from "../infrastructure/entities/Room";
 import Hotel from "../infrastructure/entities/Hotel";
 import { NotFoundError } from "../api/domain/errors/index";
 
@@ -80,9 +81,6 @@ export const getRoomCategoryByHotel = async (
     const limit = 2; // 2 movies per page
     const skip = (page - 1) * limit;
 
-    console.log("hotelId", hotelId);
-    console.log("page", page);
-
     const roomCategories = await RoomCategory.find({
       hotelId: hotelId,
     })
@@ -101,6 +99,72 @@ export const getRoomCategoryByHotel = async (
       roomCategories,
       totalRoomCategories: count,
       pages: Math.ceil(count / limit),
+      page,
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+export const getRoomsByQuery = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const hotelId = req.query.hotelId;
+    const categoryId = req.query.categoryId;
+    const page = Number(req.query.pageNumber) || 1;
+    const limit = 3; // 2 movies per page
+    const skip = (page - 1) * limit;
+
+    console.log("hotelId", hotelId);
+    console.log("categoryId", categoryId);
+
+    const query: any = {};
+    if (hotelId && categoryId) {
+      query.hotelId = hotelId;
+      query.categoryId = categoryId;
+    }
+
+    const rooms = await Room.find(query)
+      .populate("hotelId", "name")
+      .populate("categoryId", "name")
+      .select("roomNumber status floor")
+      .select("name")
+      .skip(skip)
+      .limit(limit);
+
+    const newRooms = rooms.map((room: any) => ({
+      _id: room._id,
+      room: room.roomNumber,
+      floor: room.floor,
+      hotel: {
+        _id: room.hotelId._id,
+        name: room.hotelId.name,
+      },
+      category: {
+        _id: room.categoryId._id,
+        name: room.categoryId.name,
+      },
+      status: room.status,
+    }));
+
+    if (newRooms.length === 0) {
+      throw new NotFoundError("No Room Category found");
+    }
+
+    const count = await Room.countDocuments({
+      hotelId: hotelId,
+      categoryId: categoryId,
+    });
+
+    console.log("count", count);
+
+    res.status(200).json({
+      newRooms,
+      totalRooms: count,
+      totalPages: Math.ceil(count / limit),
       page,
     });
   } catch (error) {

@@ -15,6 +15,7 @@ const CreateRoomDto = z.object({
     .number()
     .int("Floor must be a whole number") // Floors are typically integers
     .min(1, "Floor must be 1 or higher"),
+  status: z.string().trim().min(1, "Status  cannot be empty"),
 });
 
 export { CreateRoomDto };

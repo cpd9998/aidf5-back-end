@@ -8,7 +8,6 @@ const RoomSchema = new mongoose.Schema(
       unique: true,
     },
     hotelId: {
-      // Assuming hotelId is a MongoDB ObjectId reference
       type: mongoose.Schema.Types.ObjectId,
       ref: "Hotel",
       required: true,
@@ -23,7 +22,7 @@ const RoomSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["Available", "Occupied", "Maintenance", "Cleaning"],
-      default: "Available",
+
       required: true,
     },
 

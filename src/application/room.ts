@@ -10,6 +10,8 @@ export const createRoom = async (
 ) => {
   try {
     const roomData = req.body;
+
+    console.log("room data", roomData);
     const result = CreateRoomDto.safeParse(roomData);
 
     if (!result.success) {
@@ -53,10 +55,20 @@ export const getRoomlById = async (
 ) => {
   try {
     const _id = req.params.id;
-    const room = await Room.findById(_id);
+    const room = await Room.findById(_id)
+      .populate({
+        path: "hotelId",
+        select: "name",
+      })
+      .populate({
+        path: "categoryId",
+        select: "name",
+      });
+
     if (!room) {
       throw new NotFoundError("Room Category not found");
     }
+
     res.status(200).json(room);
   } catch (error) {
     console.log(error);
