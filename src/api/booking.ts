@@ -1,19 +1,16 @@
 import express from "express";
 import {
   createBooking,
-  getAllBookings,
-  getBookingById,
-  updateBooking,
-  deleteBooking,
+  checkAvailability,
+  updateBookingStatus,
+  cancelBooking,
 } from "../application/booking";
 
 const bookingRouter = express.Router();
 
-bookingRouter.route("/").post(createBooking).get(getAllBookings);
-bookingRouter
-  .route("/:bookingId")
-  .get(getBookingById)
-  .put(updateBooking)
-  .delete(deleteBooking).delete;
+bookingRouter.route("/").post(createBooking);
+bookingRouter.route("/availability").get(checkAvailability);
+
+bookingRouter.route("/:id").put(updateBookingStatus).patch(cancelBooking);
 
 export default bookingRouter;

@@ -3,6 +3,7 @@ import { RoomCategory } from "../infrastructure/entities/RoomCategory";
 import { Room } from "../infrastructure/entities/Room";
 import Hotel from "../infrastructure/entities/Hotel";
 import { NotFoundError } from "../api/domain/errors/index";
+import { Booking } from "../infrastructure/entities/Booking";
 
 export const getAllHotelsByQuey = async (
   req: Request,
@@ -46,7 +47,7 @@ export const getRoomCategoryByQuery = async (
   try {
     //load more movies functionality
     const page = Number(req.query.pageNumber) || 1;
-    const limit = 2; // 2 movies per page
+    const limit = 3; // 2 movies per page
     const skip = (page - 1) * limit;
 
     const roomCategories = await RoomCategory.find({})
@@ -60,10 +61,9 @@ export const getRoomCategoryByQuery = async (
     const count = await RoomCategory.countDocuments({});
 
     res.status(200).json({
-      roomCategories,
-      totalRoomCategories: count,
-      pages: Math.ceil(count / limit),
-      page,
+      totalRoomCategoires: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
     });
   } catch (error) {
     console.log(error);
@@ -78,7 +78,7 @@ export const getRoomCategoryByHotel = async (
   try {
     const hotelId = req.params.id;
     const page = Number(req.query.pageNumber) || 1;
-    const limit = 2; // 2 movies per page
+    const limit = 3; // 2 movies per page
     const skip = (page - 1) * limit;
 
     const roomCategories = await RoomCategory.find({
@@ -165,7 +165,52 @@ export const getRoomsByQuery = async (
       newRooms,
       totalRooms: count,
       totalPages: Math.ceil(count / limit),
-      page,
+      currentPage: page,
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const getBookingsByQuery = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    //load more movies functionality
+    const page = Number(req.query.pageNumber) || 1;
+    const limit = 3; // 2 movies per page
+    const skip = (page - 1) * limit;
+
+    const bookigList = await Booking.find({})
+      .skip(skip)
+      .limit(limit)
+      .populate("hotelId", "name")
+      .select({
+        bookingNumber: 1,
+        checkInDate: 1,
+        checkOutDate: 1,
+        "guestDetails.firstName": 1,
+        "guestDetails.lastName": 1,
+        "guestDetails.idNumber": 1,
+        totalAmount: 1,
+        paymentStatus: 1,
+        bookingStatus: 1,
+      });
+
+    if (!bookigList || bookigList.length === 0) {
+      throw new NotFoundError("No bookings found");
+    }
+
+    const count = await Booking.countDocuments({});
+
+    res.status(200).json({
+      bookigList,
+      totalBookings: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
     });
   } catch (error) {
     console.log(error);
