@@ -18,7 +18,6 @@ export const checkAvailability = async (
   try {
     const { hotelId, checkInDate, checkOutDate, maxAdults, maxChildren } =
       req.query;
-
     if (!hotelId || !checkInDate || !checkOutDate) {
       throw new ValidationError(
         "hotelId, checkInDate and checkOutDate are required"
@@ -144,11 +143,11 @@ export const createBooking = async (
     const availableRooms = [];
     for (const room of allRooms) {
       if (checkIn >= checkOut) {
-        throw new Error("Check-out date must be after check-in date");
+        throw new ValidationError("Check-out date must be after check-in date");
       }
 
       if (checkIn < new Date()) {
-        throw new Error("Check-in date cannot be in the past");
+        throw new ValidationError("Check-in date cannot be in the past");
       }
 
       // Find overlapping bookings

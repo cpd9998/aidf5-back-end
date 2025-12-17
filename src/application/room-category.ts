@@ -74,16 +74,15 @@ export const getRoomCategorylById = async (
 ) => {
   try {
     const _id = req.params.id;
-    const hotel = await RoomCategory.findById(_id).populate({
+    const category = await RoomCategory.findById(_id).populate({
       path: "hotelId",
       select: "name",
     });
-    if (!hotel) {
+    if (!category) {
       throw new NotFoundError("Room Category not found");
     }
 
-    console.log("hotel", hotel);
-    res.status(200).json(hotel);
+    res.status(200).json(category);
   } catch (error) {
     console.log(error);
     next(error);

@@ -61,6 +61,7 @@ export const getRoomCategoryByQuery = async (
     const count = await RoomCategory.countDocuments({});
 
     res.status(200).json({
+      roomCategories,
       totalRoomCategoires: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
