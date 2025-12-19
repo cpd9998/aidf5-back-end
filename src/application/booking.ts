@@ -71,7 +71,7 @@ export const checkAvailability = async (
       });
 
       const bookedRoomIds = overlappingBookings.map((b: any) =>
-        b.roomId.toString()
+        b.roomId?.toString()
       );
 
       const availableRooms = rooms.filter(

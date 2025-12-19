@@ -11,6 +11,7 @@ import globalErrorHandlingMiddleware from "./src/api/middleware/global-error-han
 import { clerkMiddleware } from "@clerk/express";
 import searchRouter from "./src/api/search";
 import paginationRouter from "./src/api/pagination";
+import paymentRouter from "./src/api/payment";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/api/users", userRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/location", locationRouter);
 app.use("/api/pagination", paginationRouter);
+app.use("/api/payment", paymentRouter);
 
 app.use(globalErrorHandlingMiddleware);
 
